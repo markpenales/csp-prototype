@@ -10,18 +10,29 @@
     <title>Year</title>
 </head>
 
-<body>
-    <div class="row">
-        <p class="fs-1 d-flex justify-content-center">Programs</p>
+<body class="bg-light">
 
-        <div class="col-sm-8 mx-auto">
-            {% for year in years %}
-                <a href="{% url 'section' program=program year=year.id %}" class="btn btn-primary d-block py-2 px-3 my-2">{{ year.year }}</a>
-            {% endfor %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Programs</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-sm-8">
+                {% for year in years %}
+                    <a href="{% url 'section' program=program year=year.id %}"
+                        class="btn btn-primary d-block py-3 px-4 mb-2 text-center">
+                        {{ year.year }}
+                    </a>
+                {% endfor %}
+            </div>
         </div>
 
-        <p class="fs-1 d-flex justify-content-center">Laboratories</p>
+
     </div>
+
+    <!-- Bootstrap JS and Popper.js from CDN (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+
 </body>
 
 </html>
