@@ -47,5 +47,6 @@ class Schedule(models.Model):
     day = models.ForeignKey(Day, null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(Instructor, null=True, on_delete=models.SET_NULL)
     laboratory = models.ForeignKey(Laboratory, null=True, on_delete=models.SET_NULL)
-    time_start = models.TimeField()
-    time_end = models.TimeField()
+    time_start = models.CharField(max_length=255)
+    time_end = models.CharField(max_length=255)
+    

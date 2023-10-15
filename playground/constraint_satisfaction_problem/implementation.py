@@ -132,9 +132,8 @@ class SchedulingProblem:
             self.problem.addConstraint(self.time_constraint, ["timeslot"])
             solutions = self.problem.getSolutions()
 
-        for solution in solutions:
-            print(solution)
         return solutions
+    
 
     def instructors_constraint(self, instructor):
         if (
@@ -183,7 +182,7 @@ class SchedulingProblem:
             if (
                 time >= start
                 and time < end
-                and timeslot.split(" ")[0] == schedule[1].split(" ")[0]
+                and timeslot.split(" ")[0] == schedule.time_start.split(" ")[0]
             ):
                 return False
 

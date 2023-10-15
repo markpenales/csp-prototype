@@ -1,27 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
-        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script type="module">
+        import { Calendar } from 'https://cdn.skypack.dev/@fullcalendar/core';
+        import timeGridPlugin from 'https://cdn.skypack.dev/@fullcalendar/timegrid';
+    
+        function getDayPosition(dayName) {
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday','sunday', ];
+            const lowercaseDayName = dayName.toLowerCase();
+            const dayIndex = daysOfWeek.indexOf(lowercaseDayName);
+        
+            // Check if the provided day name is valid
+            if (dayIndex !== -1) {
+                // Add 1 to the day index to make it 1-based instead of 0-based
+                return dayIndex + 1;
+            } else {
+                // Day name is not valid
+                return -1;
+            }
+        }        
+
+        function convertTo24HourFormat(inputTime) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+            // Extract day, hours, minutes, and AM/PM from the input string
+            const [, day, time, modifier] = inputTime.match(/([a-zA-Z]+) (\d+:\d+) (am|pm)/i);
+        
+            // Convert hours to 24-hour format
+            let hours24 = parseInt(time.split(':')[0], 10);
+            if (modifier.toLowerCase() === 'pm' && hours24 !== 12) {
+                hours24 += 12;
+            } else if (modifier.toLowerCase() === 'am' && hours24 === 12) {
+                hours24 = 0;
+            }
+        
+            // Pad single-digit hours and minutes with leading zeros
+            const formattedHours = hours24.toString().padStart(2, '0');
+            const formattedMinutes = time.split(':')[1].padStart(2, '0');
+        
+            // Return the time in 'HH:mm' format
+            return `${formattedHours}:${formattedMinutes}`;
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+          var calendarEl = document.getElementById('calendar');
+          var events = []
+
+          {%for schedule in schedules%}
+            events.push({
+                title: '{{schedule.course.name}}',
+                startTime: convertTo24HourFormat('{{schedule.time_start}}'),
+                endTime: convertTo24HourFormat('{{schedule.time_end}}'),
+                daysOfWeek: [getDayPosition('{{schedule.time_start}}'.split(' ')[0])]
+            })
+          {%endfor%}
+          console.log(events)
+          var calendar = new Calendar(calendarEl, {
+            plugins: [timeGridPlugin],
+            initialView: 'timeGridFourDay',
+            
+            views: {
+              timeGridFourDay: {
+                type: 'timeGrid',
+                duration: { days: 7 },
+                slotMinTime: '07:00:00',
+                slotMaxTime: '20:00:00',
+                allDaySlot:false,
+              }
+            },
+            events: events
+          });
+          calendar.render();
+        });
+      </script>
     <title>Year</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="row">
-        <p class="fs-1 d-flex justify-content-center">Programs</p>
-        <a href="{%url 'create_schedule' id=id%}" class="btn btn-primary">Add a Schedule</a>
+      <p class="fs-1 d-flex justify-content-center">Programs</p>
+      <a href="{% url 'create_schedule' id=id %}" class="btn btn-primary">Add a Schedule</a>
 
-        <div class="col-sm-8 mx-auto">
-            {% for schedule in schedules %}
-                <a href="" class="btn btn-primary d-block py-2 px-3 my-2">{{ schedule }}</a>
-            {% endfor %}
-        </div>
+      {% comment %} <div class="col-sm-8 mx-auto">
+        {% for schedule in schedules %}
+          <a href="" class="btn btn-primary d-block py-2 px-3 my-2">{{ schedule }}</a>
+        {% endfor %} {% endcomment %}
 
+        <div id='calendar'></div>
+      </div>
     </div>
-</body>
-
+  </body>
 </html>
