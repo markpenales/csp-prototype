@@ -42,6 +42,9 @@ class Instructor(models.Model):
     name = models.CharField(max_length=255)
     expertise = models.ForeignKey(Course, null=True, on_delete=models.SET_NULL)
 
+    def get_schedules(self):
+        schedules = Schedule.objects.filter(instructor=self)
+        return schedules.all()
 
 class Day(models.Model):
     name = models.CharField(max_length=255)

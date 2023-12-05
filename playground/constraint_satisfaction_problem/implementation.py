@@ -118,16 +118,15 @@ class SchedulingProblem:
 
         self.problem.addConstraint(self.laboratory_constraint, ["laboratory"])
         self.problem.addConstraint(self.time_constraint, ["timeslot"])
-        self.problem.addConstraint(self.instructors_constraint, ["instructors"])
+        self.problem.addConstraint(self.instructor_constraint, ["instructors", "timeslot"])
 
         solutions = self.problem.getSolutions()
         if len(solutions) == 0:
-            print("No solutions")
             self.problem.reset()
             self.problem.addVariable("timeslot", self.timeslots)
             self.problem.addVariable("laboratory", labs)
             self.problem.addVariable("instructors", instructors)
-            self.problem.addConstraint(self.instructors_constraint, ["instructors"])
+            self.problem.addConstraint(self.instructor_constraint, ["instructors", "timeslot"])
             self.problem.addConstraint(self.laboratory_soft_constraint, ["laboratory"])
             self.problem.addConstraint(self.time_constraint, ["timeslot"])
             solutions = self.problem.getSolutions()
@@ -135,12 +134,29 @@ class SchedulingProblem:
         return solutions
     
 
-    def instructors_constraint(self, instructor):
+    def instructor_constraint(self, instructor,timeslot):
         if (
             instructor.expertise is not None
             and instructor.expertise.name == self.course
         ):
-            return True
+            instructor_ids = Instructor.objects.filter(name=instructor.name)
+            time = self.get_time(timeslot)
+            
+            for instructor in instructor_ids:
+                schedules = instructor.get_schedules()
+                if not schedules:
+                    return True
+                
+                for schedule in schedules:
+                    start = self.get_time(schedule.time_start)
+                    end = self.get_time(schedule.time_end)
+                    
+                    if (
+                        time >= start
+                        and time < end
+                        and timeslot.split(" ")[0] == schedule.time_start.split(" ")[0]
+                    ):
+                        return False
         return False
 
     def laboratory_soft_constraint(self, laboratory):
