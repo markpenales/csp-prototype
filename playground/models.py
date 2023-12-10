@@ -36,6 +36,12 @@ class Course(models.Model):
 class Laboratory(models.Model):
     name = models.CharField(max_length=255)
     course = models.TextField()
+    
+    def get_schedules(self):
+        return Schedule.objects.filter(laboratory=self)
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.course}"
 
 
 class Instructor(models.Model):

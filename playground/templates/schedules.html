@@ -80,7 +80,7 @@
 
           {%for schedule in schedules%}
             events.push({
-                title: '{{schedule.course.name}}',
+                title: '{{schedule.course.name}} - {{schedule.instructor.name}}',
                 startTime: convertTo24HourFormat('{{schedule.time_start}}'),
                 endTime: convertTo24HourFormat('{{schedule.time_end}}'),
                 daysOfWeek: [getDayPosition('{{schedule.time_start}}'.split(' ')[0])]

@@ -1,11 +1,13 @@
 from datetime import datetime
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from playground.constraint_satisfaction_problem.implementation import SchedulingProblem
 from playground.forms import CreateScheduleForm, SaveScheduleForm
 from django.core.serializers import serialize
-
+from django.forms.models import model_to_dict
 from playground.models import Course, Instructor, Laboratory, Program, Schedule, Year, Section, Day
+from pprint import pprint
+import json
 
 
 # Create your views here.
@@ -45,10 +47,21 @@ def create_section_schedule(request, id):
         form = CreateScheduleForm(request.POST)
         if form.is_valid():
             solutions = SchedulingProblem(form.cleaned_data["course"], section).solve()
-            instructors = list(set(solution.get('instructors').name for solution in solutions))
+            instructors = [{'instructor': solution.get('instructors').name, 'timeslot': solution.get('timeslot')} for solution in solutions]
             laboratories = list(set(solution.get('laboratory').name for solution in solutions))
-            timeslots = sorted(set(solution.get('timeslot') for solution in solutions))
-            
+            # for solution in solutions:
+            #     solution['laboratory'] = model_to_dict(solution['laboratory'])
+            #     solution['instructors'] = model_to_dict(solution['instructors'])
+            # return JsonResponse(solutions, safe=False)
+            instructor_set = {}
+            for instructor in instructors:
+                name = instructor['instructor']
+                time = instructor['timeslot']
+                if name not in instructor_set:
+                    instructor_set[name] = [time]
+                else:
+                    if time not in instructor_set[name]:
+                        instructor_set[name].append(time)
             days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
             # Define a function to convert time to a sortable value
@@ -56,12 +69,7 @@ def create_section_schedule(request, id):
                 time_obj = datetime.strptime(time_str, '%I:%M %p')
                 return time_obj.time()
 
-            # Sort the timeslots based on the custom order of days and time within each day
-            sorted_timeslots = sorted(timeslots, key=lambda x: (days_order.index(x.split()[0]), time_to_sortable_value(x.split()[1] + ' ' + x.split()[2])))
-
-
-
-            return render(request, "select_schedule.html", {"instructors": instructors, "laboratories": laboratories, "timeslots": sorted_timeslots, "section": section.id, "course": form.cleaned_data["course"]})
+            return render(request, "select_schedule.html", {"instructors": instructor_set, "laboratories": laboratories, "section": section.id, "course": form.cleaned_data["course"]})
             
             
 
