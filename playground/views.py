@@ -8,14 +8,23 @@ from django.forms.models import model_to_dict
 from playground.models import Course, Instructor, Laboratory, Program, Schedule, Year, Section, Day
 from pprint import pprint
 import json
+from django.db.models import F
 
 
 # Create your views here.
 def hello(request) -> HttpResponse:
     program = Program.objects.all()
+    year = Year.objects.all()
 
-    return render(request, "index.html", {"programs": program})
+    return render(request, "index.html", {"programs": program, "years": year})
 
+def get_sections(request):
+    program_id = request.GET.get('program_id')
+    year_id = request.GET.get('year_id')
+
+    sections = Section.objects.filter(program_id=program_id, year_id=year_id).annotate(name=F('section_name__name')).values('id', 'name')
+    sections = list(sections)
+    return JsonResponse({'sections': sections})
 
 def year(request, program) -> HttpResponse:
     year = Year.objects.all()
