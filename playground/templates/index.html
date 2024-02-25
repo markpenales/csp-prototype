@@ -38,7 +38,7 @@
                         <option disabled selected>Select Year</option>
 
                         {% for year in years %}
-                            <option value={{year.id}}>{{year.year}}</option>
+                        <option value={{year.id}}>{{year.year}}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -66,7 +66,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 
-    function populateSectionDropdown(){
+    function populateSectionDropdown() {
         console.log("getting")
         var programId = document.getElementById('program').value;
         var yearId = document.getElementById('year').value;
@@ -74,11 +74,11 @@
         $.ajax({
             url: '/playground/sections',
             type: 'GET',
-            data:{
+            data: {
                 program_id: programId,
                 year_id: yearId
             },
-            success: function(response){
+            success: function (response) {
 
                 var sectionDropdown = document.getElementById('section')
                 sectionDropdown.innerHTML = ''
@@ -102,6 +102,22 @@
             }
         })
     }
+    // Function to handle form submission
+    function handleSubmit(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Get the selected section ID from the dropdown
+        var sectionId = document.getElementById('section').value;
+
+        // Construct the redirect URL with the section ID
+        var redirectUrl = "/playground/schedule/section/" + sectionId;
+
+        // Redirect to the constructed URL
+        window.location.href = redirectUrl;
+    }
+
+    // Add event listener to the form for form submission
+    document.querySelector('form').addEventListener('submit', handleSubmit);
 
     // Event listener to call updateSections when both program and year dropdowns change
     document.getElementById('program').addEventListener('change', populateSectionDropdown);
@@ -111,4 +127,5 @@
     populateSectionDropdown();
 
 </script>
+
 </html>

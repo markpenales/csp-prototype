@@ -107,7 +107,7 @@ def save_section_schedule(request):
             
             
             
-            return redirect('programs')
+            return redirect('/playground/schedule/section/'+form.cleaned_data['section'])
         
 
         else:
